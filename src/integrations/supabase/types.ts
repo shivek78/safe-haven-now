@@ -14,7 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      community_posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_anonymous: boolean | null
+          latitude: number | null
+          likes_count: number | null
+          location_name: string | null
+          longitude: number | null
+          post_type: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          latitude?: number | null
+          likes_count?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          post_type?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          latitude?: number | null
+          likes_count?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          post_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      emergency_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          resolved_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          resolved_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          resolved_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      incident_reports: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          incident_type: string
+          is_anonymous: boolean | null
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          severity: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          incident_type: string
+          is_anonymous?: boolean | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          severity?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          incident_type?: string
+          is_anonymous?: boolean | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          severity?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          allergies: string | null
+          avatar_url: string | null
+          blood_type: string | null
+          created_at: string
+          display_name: string | null
+          emergency_instructions: string | null
+          emergency_medical_info: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          allergies?: string | null
+          avatar_url?: string | null
+          blood_type?: string | null
+          created_at?: string
+          display_name?: string | null
+          emergency_instructions?: string | null
+          emergency_medical_info?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allergies?: string | null
+          avatar_url?: string | null
+          blood_type?: string | null
+          created_at?: string
+          display_name?: string | null
+          emergency_instructions?: string | null
+          emergency_medical_info?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trusted_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          name: string
+          phone: string
+          relationship: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          phone: string
+          relationship?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          phone?: string
+          relationship?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -7,14 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BottomNavigation, PageHeader } from "@/components/Navigation";
 import {
   MapPin,
-  Calendar,
-  Clock,
   AlertTriangle,
-  Camera,
   Send,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const incidentTypes = [
   { id: "harassment", label: "Harassment" },
@@ -25,27 +25,93 @@ const incidentTypes = [
   { id: "other", label: "Other" },
 ];
 
+const severityLevels = [
+  { id: "low", label: "Low", color: "bg-success/10 text-success" },
+  { id: "medium", label: "Medium", color: "bg-warning/10 text-warning" },
+  { id: "high", label: "High", color: "bg-destructive/10 text-destructive" },
+];
+
 export default function Report() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [selectedType, setSelectedType] = useState("");
+  const [severity, setSeverity] = useState("medium");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Not supported",
+        description: "Geolocation is not supported by your browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocation(`${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+        setGettingLocation(false);
+        toast({
+          title: "Location captured",
+          description: "Your current location has been added.",
+        });
+      },
+      (error) => {
+        setGettingLocation(false);
+        toast({
+          title: "Location error",
+          description: "Unable to get your location. Please enter manually.",
+          variant: "destructive",
+        });
+      }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { error } = await supabase.from("incident_reports").insert({
+        user_id: user?.id,
+        incident_type: selectedType,
+        description,
+        location_name: location,
+        latitude: coords?.lat,
+        longitude: coords?.lng,
+        severity,
+        is_anonymous: isAnonymous,
+      });
+
+      if (error) throw error;
+
       setSubmitted(true);
-      setLoading(false);
       toast({
         title: "Report submitted",
         description: "Thank you for helping keep our community safe.",
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -72,6 +138,9 @@ export default function Report() {
                 setSelectedType("");
                 setDescription("");
                 setLocation("");
+                setSeverity("medium");
+                setIsAnonymous(false);
+                setCoords(null);
               }}
             >
               Submit Another Report
@@ -116,6 +185,25 @@ export default function Report() {
                 </div>
               </div>
 
+              {/* Severity */}
+              <div className="space-y-2">
+                <Label>Severity Level</Label>
+                <div className="flex gap-2">
+                  {severityLevels.map((level) => (
+                    <Button
+                      key={level.id}
+                      type="button"
+                      variant={severity === level.id ? "default" : "secondary"}
+                      size="sm"
+                      onClick={() => setSeverity(level.id)}
+                      className={severity === level.id ? "" : level.color}
+                    >
+                      {level.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
               {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
@@ -147,39 +235,30 @@ export default function Report() {
                   variant="ghost"
                   size="sm"
                   className="text-primary"
+                  onClick={handleGetLocation}
+                  disabled={gettingLocation}
                 >
-                  <MapPin className="w-4 h-4 mr-1" />
+                  {gettingLocation ? (
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4 mr-1" />
+                  )}
                   Use current location
                 </Button>
               </div>
 
-              {/* Date and Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input id="date" type="date" className="pl-11 h-12" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="time">Time</Label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input id="time" type="time" className="pl-11 h-12" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Photo Upload */}
-              <div className="space-y-2">
-                <Label>Add Photos (optional)</Label>
-                <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <Camera className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Tap to upload photos
-                  </p>
-                </div>
+              {/* Anonymous Option */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="anonymous"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="anonymous" className="text-sm font-normal">
+                  Submit anonymously
+                </Label>
               </div>
 
               {/* Submit */}
@@ -190,7 +269,10 @@ export default function Report() {
                 disabled={!selectedType || !description || loading}
               >
                 {loading ? (
-                  "Submitting..."
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Submitting...
+                  </>
                 ) : (
                   <>
                     <Send className="w-5 h-5 mr-2" />
