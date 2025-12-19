@@ -28,6 +28,7 @@ interface Contact {
   id: string;
   name: string;
   phone: string;
+  email: string | null;
   relationship: string | null;
   is_primary: boolean;
 }
@@ -42,6 +43,7 @@ export default function Contacts() {
   const [newContact, setNewContact] = useState({
     name: "",
     phone: "",
+    email: "",
     relationship: "",
   });
 
@@ -89,6 +91,7 @@ export default function Contacts() {
         user_id: user?.id,
         name: newContact.name,
         phone: newContact.phone,
+        email: newContact.email || null,
         relationship: newContact.relationship || null,
         is_primary: contacts.length === 0,
       });
@@ -96,7 +99,7 @@ export default function Contacts() {
       if (error) throw error;
 
       await fetchContacts();
-      setNewContact({ name: "", phone: "", relationship: "" });
+      setNewContact({ name: "", phone: "", email: "", relationship: "" });
       setIsAddingContact(false);
       toast({
         title: "Contact added",
@@ -212,20 +215,32 @@ export default function Contacts() {
                     onChange={(e) =>
                       setNewContact({ ...newContact, phone: e.target.value })
                     }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="relationship">Relationship</Label>
-                  <Input
-                    id="relationship"
-                    placeholder="e.g., Family, Friend, Partner"
-                    value={newContact.relationship}
-                    onChange={(e) =>
-                      setNewContact({ ...newContact, relationship: e.target.value })
-                    }
-                  />
-                </div>
-                <Button className="w-full" onClick={handleAddContact} disabled={saving}>
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email (for notifications)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="contact@email.com"
+                      value={newContact.email}
+                      onChange={(e) =>
+                        setNewContact({ ...newContact, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="relationship">Relationship</Label>
+                    <Input
+                      id="relationship"
+                      placeholder="e.g., Family, Friend, Partner"
+                      value={newContact.relationship}
+                      onChange={(e) =>
+                        setNewContact({ ...newContact, relationship: e.target.value })
+                      }
+                    />
+                  </div>
+                  <Button className="w-full" onClick={handleAddContact} disabled={saving}>
                   {saving ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (

@@ -47,7 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get trusted contacts
     const { data: contacts, error: contactsError } = await supabase
       .from("trusted_contacts")
-      .select("name, phone, relationship")
+      .select("name, phone, email, relationship")
       .eq("user_id", user_id);
 
     if (contactsError) {
@@ -85,9 +85,11 @@ const handler = async (req: Request): Promise<Response> => {
     const locationText = location_name || (latitude && longitude ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : "Unknown location");
 
     // Send email notifications to contacts (using Resend)
-    const emailPromises = (contacts || []).map(async (contact) => {
-      // For demo purposes, we'll log the notification since Resend requires verified domains
-      console.log(`Sending email notification to ${contact.name} for emergency from ${userName}`);
+    const contactsWithEmail = (contacts || []).filter(c => c.email);
+    console.log(`Contacts with email: ${contactsWithEmail.length}`);
+    
+    const emailPromises = contactsWithEmail.map(async (contact) => {
+      console.log(`Sending email notification to ${contact.name} (${contact.email}) for emergency from ${userName}`);
       
       try {
         const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -98,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
           },
           body: JSON.stringify({
             from: "SafeHer <onboarding@resend.dev>",
-            to: ["delivered@resend.dev"], // Demo email - replace with contact.email when you have verified domain
+            to: [contact.email],
             subject: `🚨 EMERGENCY ALERT from ${userName}`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -150,7 +152,8 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({
         success: true,
         alertId: alert.id,
-        contactsNotified: contacts?.length || 0,
+        contactsNotified: contactsWithEmail.length,
+        totalContacts: contacts?.length || 0,
         location: { latitude, longitude, location_name },
       }),
       {
