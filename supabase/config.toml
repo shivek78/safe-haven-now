@@ -1,1 +1,4 @@
 project_id = "epyjznpqvwmcjnalpbwm"
+
+[functions.send-sos-notification]
+verify_jwt = false
