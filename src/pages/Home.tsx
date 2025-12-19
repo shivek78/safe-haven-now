@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BottomNavigation, PageHeader } from "@/components/Navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertTriangle,
   Phone,
@@ -65,7 +67,28 @@ const recentAlerts = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const [userName] = useState("Sarah");
+  const { user } = useAuth();
+  const [userName, setUserName] = useState("User");
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (data?.display_name) {
+          setUserName(data.display_name);
+        } else if (user.email) {
+          setUserName(user.email.split('@')[0]);
+        }
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gradient-hero pb-24">
@@ -95,9 +118,9 @@ export default function Home() {
                 <span>SOS</span>
               </div>
             </Button>
-            {/* Pulse rings */}
-            <div className="absolute inset-0 rounded-full border-2 border-destructive/30 animate-ping" />
-            <div className="absolute inset-[-8px] rounded-full border border-destructive/20 animate-pulse" />
+            {/* Pulse rings - pointer-events-none to allow clicks through */}
+            <div className="absolute inset-0 rounded-full border-2 border-destructive/30 animate-ping pointer-events-none" />
+            <div className="absolute inset-[-8px] rounded-full border border-destructive/20 animate-pulse pointer-events-none" />
           </div>
           <p className="text-sm text-muted-foreground">
             Tap to send emergency alert to your trusted contacts
