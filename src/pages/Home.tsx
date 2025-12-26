@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Bell,
   UserPlus,
+  History,
 } from "lucide-react";
 
 const quickActions = [
@@ -178,6 +179,26 @@ export default function Home() {
               </div>
               <ChevronRight className="w-5 h-5 text-primary-foreground/60" />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Alert History Link */}
+        <Card
+          variant="elevated"
+          className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate("/alert-history")}
+        >
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-destructive/10 rounded-xl">
+              <History className="w-6 h-6 text-destructive" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Alert History</h3>
+              <p className="text-sm text-muted-foreground">
+                View your past emergency alerts
+              </p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </CardContent>
         </Card>
 
