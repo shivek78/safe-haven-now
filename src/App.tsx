@@ -14,6 +14,7 @@ import Community from "./pages/Community";
 import Contacts from "./pages/Contacts";
 import SafetyTips from "./pages/SafetyTips";
 import Profile from "./pages/Profile";
+import AlertHistory from "./pages/AlertHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
             <Route path="/safety-tips" element={<ProtectedRoute><SafetyTips /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/alert-history" element={<ProtectedRoute><AlertHistory /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
